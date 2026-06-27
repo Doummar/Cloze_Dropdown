@@ -12,7 +12,7 @@ Originally built for my own daily study sessions and later shared with the Anki 
 
 ### Interactive Dropdown Review
 
-![Demo](https://i.postimg.cc/XqyBqxFK/2026-06-2715-16-03-ezgif-com-video-to-gif-converter.gif)
+![Demo](https://i.postimg.cc/9fRBZPGH/5.gif)
 
 ---
 
