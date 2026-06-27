@@ -24,7 +24,7 @@ All v1.2.0 – v1.2.1 fixes are retained.
 
 ADDON_NAME       = "Cloze Dropdown"
 ADDON_AUTHOR     = "Adel Aitah"
-ADDON_VERSION    = "1.2.2"
+ADDON_VERSION    = "1.2.5"
 ADDON_URL        = "https://github.com/Doummar/Cloze_Dropdown"
 ADDON_ISSUES_URL = "https://github.com/Doummar/Cloze_Dropdown/issues"
 HANDLE           = "cloze_dropdown"
@@ -54,6 +54,13 @@ def get_config():
     except (TypeError, ValueError):
         quiz_options = 8
     quiz_options = max(2, min(9, quiz_options))
+    # Bug fix: .isdigit() returns False for floats ("20.0") and negatives ("-5"),
+    # silently falling back to 20 instead of clamping. Use try/except + float()
+    # so that any numeric type stored in JSON round-trips correctly.
+    try:
+        font_size = max(10, min(40, int(float(config.get("font_size", 20)))))
+    except (TypeError, ValueError):
+        font_size = 20
     return {
         "quiz_options"             : quiz_options,
         "show_back_audio"          : config.get("show_back_audio",           True),
@@ -71,7 +78,7 @@ def get_config():
         "custom_correct_color"     : config.get("custom_correct_color",      "#3b82f6"),
         "correct_border_color"     : config.get("correct_border_color",      "#22c55e"),
         "wrong_border_color"       : config.get("wrong_border_color",        "#ef4444"),
-        "font_size"                : max(10, min(40, int(config.get("font_size", 20)))) if str(config.get("font_size", 20)).isdigit() else 20,
+        "font_size"                : font_size,
     }
 
 # ── Model save helper ─────────────────────────────────────────────────────────
@@ -403,7 +410,12 @@ def create_dsa_model():
     qtemplate += '        }\n'
     qtemplate += '        if(e.key===" "&&a.selectedIndex===0&&a.options.length>1){a.selectedIndex=1;checkAllSelected();e.preventDefault();}\n'
     qtemplate += '      }\n'
-    qtemplate += '      if(e.key==="Enter"){e.preventDefault(); checkAllSelected();\n'
+    qtemplate += '      if(e.key==="Enter"){e.preventDefault();\n'
+    qtemplate += '        // Bug fix: calling checkAllSelected() here caused a double-flip when\n'
+    qtemplate += '        // auto_back_pivot=true — checkAllSelected() schedules a flip via\n'
+    qtemplate += '        // setTimeout(150ms) AND we immediately called pycmd("ans") below.\n'
+    qtemplate += '        // Instead, save selections directly and flip once.\n'
+    qtemplate += '        dropdownConfig.forEach(function(cfg,idx){var el=document.getElementById(cfg.id);safeSetItem("anki_sel"+(idx+1),el?el.value:"");});\n'
     qtemplate += '        if(typeof pycmd!=="undefined")pycmd("ans");\n'
     qtemplate += '        else if(typeof showAnswer==="function")showAnswer();\n'
     qtemplate += '      }\n'
@@ -574,9 +586,15 @@ def _make_color_picker(initial_hex, label_text="", parent=None):
         if c.isValid():
             state[0] = c.name(); hex_edit.setText(state[0]); _refresh()
 
+    def _set(hex_val):
+        # Bug fix: expose a setter so _reset() can programmatically restore defaults.
+        state[0] = hex_val
+        hex_edit.setText(hex_val)
+        _refresh()
+
     swatch.clicked.connect(_pick); _refresh()
     row.addWidget(hex_edit); row.addWidget(swatch); row.addStretch()
-    return row, lambda: state[0]
+    return row, lambda: state[0], _set
 
 
 # ── Guide dialog — clean minimal style, no scroll, two-column footer ──────────
@@ -683,8 +701,9 @@ def show_guide_dialog(parent=None):
         QPushButton:pressed { background:#1d4ed8; }
     """)
     def _ok():
+        # Bug fix: previously called parent.reject() here, which closed the settings
+        # dialog and discarded unsaved changes. Now we just close the guide.
         dlg.accept()
-        if parent: parent.reject()
     ok_btn.clicked.connect(_ok)
     btn_row.addWidget(ok_btn)
     lay.addLayout(btn_row); lay.addSpacing(8)
@@ -773,8 +792,8 @@ def show_settings_dialog():
 
     # Answer feedback colours
     lay.addWidget(QLabel("<font color='#888'><b>ANSWER FEEDBACK COLOURS</b></font>"))
-    c_row, get_correct_border = _make_color_picker(config["correct_border_color"], "Correct border:", dlg)
-    w_row, get_wrong_border   = _make_color_picker(config["wrong_border_color"],   "Wrong border:",   dlg)
+    c_row, get_correct_border, set_correct_border = _make_color_picker(config["correct_border_color"], "Correct border:", dlg)
+    w_row, get_wrong_border,   set_wrong_border   = _make_color_picker(config["wrong_border_color"],   "Wrong border:",   dlg)
     lay.addLayout(c_row)
     lay.addLayout(w_row)
 
@@ -830,6 +849,10 @@ def show_settings_dialog():
             cb.setChecked(True)
         for cb in (a11y_cb, midcenter_cb, white_cb):
             cb.setChecked(False)
+        # Bug fix: use the setters returned by _make_color_picker to reset the
+        # border colour pickers — previously these stayed on their custom values.
+        set_correct_border("#22c55e")
+        set_wrong_border("#ef4444")
         sent_combo.setCurrentIndex(0)
         sent_hex_state[0] = "#3b82f6"; sent_hex_edit.setText(sent_hex_state[0]); _ref_sent()
 
