@@ -1,0 +1,19 @@
+{
+    "quiz_options": 8,
+    "font_size": 20,
+    "show_back_audio": true,
+    "show_regel": true,
+    "show_oversaettelse": true,
+    "auto_back_pivot": true,
+    "randomize_option_order": true,
+    "enable_keyboard_shortcuts": true,
+    "normalize_option_width": true,
+    "accessibility_indicators": false,
+    "center_mode": true,
+    "midcenter_mode": false,
+    "white_background": false,
+    "correct_sentence_color": "default",
+    "custom_correct_color": "#3b82f6",
+    "correct_border_color": "#22c55e",
+    "wrong_border_color": "#ef4444"
+}
