@@ -77,7 +77,7 @@ Originally built for my own daily study sessions and later shared with the Anki 
 
 Download directly from:
 
-(Add your AnkiWeb link)
+https://ankiweb.net/shared/info/769018946?cb=1782588890235
 
 ---
 
