@@ -3,7 +3,122 @@
 # GitHub: https://github.com/Doummar/Cloze_Dropdown
 # Copyright (c) 2026 Adel Aitah — All rights reserved
 """
-Cloze Dropdown v1.2.2
+Cloze Dropdown v1.3.5
+
+Changes in v1.3.5
+──────────────────────────────────────────────────────────────────────
+• FIX   Night Mode dropdown pop-up contrast: opening a dropdown in Night
+        Mode could show its OS/browser-native option list as pale text
+        on a near-white background — nearly unreadable — even though
+        the closed dropdown and the rest of the card looked correctly
+        dark. The `color-scheme: dark` rule added for this in an
+        earlier version isn't consistently honoured by Anki desktop's
+        own webview for the pop-up's background, while this stylesheet
+        was still (correctly) inheriting a light text colour onto it,
+        producing the low-contrast combination. `<option>` elements now
+        get an explicit background/text colour for both Light and Night
+        Mode instead of relying on inheritance, which is a much more
+        universally-honoured styling hook for native pop-ups.
+
+Changes in v1.3.4
+──────────────────────────────────────────────────────────────────────
+• FIX   Graceful fallback when inactive: window.cloze_dropdown_active is
+        only ever set by the desktop add-on's own Python hook
+        (webview_will_set_content), so it is never set on AnkiDroid,
+        AnkiMobile, or AnkiWeb — none of which run desktop add-on code
+        at all — and stays unset on desktop too if this add-on gets
+        disabled while its note type/cards remain. Every non-blank
+        quiz slot was simply hidden with nothing in its place whenever
+        that flag was unset, so the sentence silently lost words
+        instead of degrading gracefully (e.g. "Jeg — midtekst — et
+        æble hver dag." with all 8 blanks just gone, no indication
+        anything was missing). The card's own CSS already defined a
+        `.cloze-fallback` class for exactly this situation, but nothing
+        ever applied it. Now wired up: the front shows a neutral
+        "[...]" placeholder per blank (preserving the quiz), and the
+        recapped question on the back reveals the actual answer per
+        blank (matching the answer the disabled dropdown would
+        otherwise have shown).
+
+Changes in v1.3.3
+──────────────────────────────────────────────────────────────────────
+• FIX   Back audio button: reverted to sitting fixed at the top-right
+        of the window/screen itself (matching Anki's own Preview
+        player), instead of anchored inside the card box, where it
+        was overlapping the card's own text.
+
+Changes in v1.3.2
+──────────────────────────────────────────────────────────────────────
+• FIX   Back audio button: was anchoring to .answer-wrapper, which
+        starts partway down the card (below the recapped question),
+        so the button lined up with that row instead of the true top-
+        right corner of the card box. It now anchors to the outer
+        card box itself, so it sits at the actual top-right corner.
+
+Changes in v1.3.1
+──────────────────────────────────────────────────────────────────────
+• FIX   White Background: the recapped question (front) and revealed
+        answer (back) used to be two separate boxes that rarely
+        matched in size. They now share one box — the back card wraps
+        {{FrontSide}} and the answer section together, so the box is
+        literally the same element/size across the front→back flip.
+• FIX   Back audio button: was pinned to the browser viewport corner
+        (position: fixed), so it wasn't consistently placed relative
+        to the card content, and floated off the box when White
+        Background was on. Now always anchored to the top-right of
+        the answer content, the same way whether White Background is
+        on or off.
+
+Changes in v1.3.0
+──────────────────────────────────────────────────────────────────────
+• FIX   White Background: reverted the box back to hugging its own
+        text/content width (per user feedback) instead of stretching
+        to a fixed width — the box is only ever as wide as what's
+        actually inside it. The audio-button anchoring fix from
+        v1.2.9 is kept.
+
+Changes in v1.2.9
+──────────────────────────────────────────────────────────────────────
+• FIX   White Background: the front (recapped question) box and back
+        (answer) box used to shrink-wrap independently to their own
+        content, so they rarely matched in width/height. The box is
+        now a fixed width, so both always line up.
+• FIX   White Background: the back-audio play button used `position:
+        fixed`, pinning it to the browser viewport corner instead of
+        the white box — it visually floated off the box rather than
+        sitting on it. It now anchors to the white box's own corner
+        when White Background is on (unchanged when it's off).
+
+Changes in v1.2.8
+──────────────────────────────────────────────────────────────────────
+• CHANGE Removed the "Settings saved and applied" popup dialog after
+         saving Settings. Saving still applies instantly (rebuilds the
+         note type + redraws the current card) — it just no longer
+         interrupts you with a confirmation window to dismiss.
+
+Changes in v1.2.7
+──────────────────────────────────────────────────────────────────────
+• FIX   Settings no longer require restarting Anki (or reloading the
+        profile) to take effect. Saving Settings now immediately
+        rebuilds the note type's fields/templates/CSS, and redraws
+        the on-screen card right away if you're mid-review.
+
+Changes in v1.2.6
+──────────────────────────────────────────────────────────────────────
+• FIX   Night Mode: the card CSS never referenced Anki's "night-mode"
+        class, so native dropdown pop-up styling and low-contrast
+        borders didn't adapt to Night Mode. Added `.night-mode` rules
+        (color-scheme: dark; brighter unanswered-dropdown border).
+• FIX   White background + Night Mode: the white box had no explicit
+        text colour, so Night Mode's light text became invisible
+        against it (white-on-white). Text colour is now forced dark
+        inside the box in all modes.
+• FIX   White background now also wraps the back-card answer/rule/
+        translation section (previously only the recapped question
+        was wrapped), so the fix above covers the whole card.
+• FIX   Settings dialog: clicking "Got it" in the Help Guide (opened
+        from Settings) used to reject() the Settings dialog, silently
+        discarding any unsaved changes. It now just closes the guide.
 
 Changes in v1.2.2
 ──────────────────────────────────────────────────────────────────────
@@ -24,7 +139,7 @@ All v1.2.0 – v1.2.1 fixes are retained.
 
 ADDON_NAME       = "Cloze Dropdown"
 ADDON_AUTHOR     = "Adel Aitah"
-ADDON_VERSION    = "1.2.5"
+ADDON_VERSION    = "1.3.5"
 ADDON_URL        = "https://github.com/Doummar/Cloze_Dropdown"
 ADDON_ISSUES_URL = "https://github.com/Doummar/Cloze_Dropdown/issues"
 HANDLE           = "cloze_dropdown"
@@ -32,7 +147,6 @@ HANDLE           = "cloze_dropdown"
 import os
 from aqt import mw, gui_hooks
 from aqt.qt import *
-from aqt.utils import showInfo
 
 # ── Qt 6 / Qt 5 compat ───────────────────────────────────────────────────────
 ALIGN_CENTER = Qt.AlignmentFlag.AlignCenter if hasattr(Qt, "AlignmentFlag") else Qt.AlignCenter
@@ -40,6 +154,14 @@ ALIGN_TOP    = Qt.AlignmentFlag.AlignTop    if hasattr(Qt, "AlignmentFlag") else
 CURSOR_HAND  = QCursor(Qt.CursorShape.PointingHandCursor) if hasattr(Qt, "CursorShape") else QCursor(Qt.PointingHandCursor)
 TEXT_HTML    = Qt.TextFormat.RichText        if hasattr(Qt, "TextFormat")   else Qt.RichText
 SMOOTH       = Qt.TransformationMode.SmoothTransformation if hasattr(Qt, "TransformationMode") else Qt.SmoothTransformation
+
+# ── Dark-mode detection ───────────────────────────────────────────────────────
+def _is_dark():
+    """Return True when Anki's night-mode is active."""
+    try:
+        return bool(mw.pm.night_mode())
+    except Exception:
+        return False
 
 # ── Singleton guard ───────────────────────────────────────────────────────────
 _menu_action = None
@@ -112,15 +234,42 @@ def _build_css(config):
 
     # White background wrapper
     if config.get("white_background", False):
+        # Bug fix (dark mode): the box itself is ALWAYS pure white, regardless
+        # of Anki's Night Mode. Previously no text colour was set here, so the
+        # content inside inherited Night Mode's light/near-white text colour
+        # and became invisible (white text on a white box). Text colour is now
+        # forced dark so it stays legible in both Light and Night Mode.
+        #
+        # Box hugs its own content width (inline-block) rather than stretching
+        # to a fixed width — the box should only be as wide as the text/
+        # dropdowns actually inside it.
         wrapper_css = """
-    /* White background — inline-block so box is only as wide as content */
+    /* White background — hugs its own content width */
     .cd-card-wrapper {
+        position: relative;
         display: inline-block !important;
+        max-width: 92%;
         text-align: left !important;
         background: #ffffff;
+        color: #1f2937 !important;
         border-radius: 10px;
         padding: 20px 32px;
         box-shadow: 0 1px 5px rgba(0,0,0,0.09);
+    }
+    /* Bug fix: the back card wraps {{FrontSide}} (which already contains its
+       own .cd-card-wrapper box) together with the answer section inside one
+       shared outer .cd-card-wrapper, so the box covers the whole card and
+       matches the front box exactly (same element, so same width). That
+       nests a .cd-card-wrapper inside another one, which would otherwise
+       draw two boxes (border/shadow/padding) one inside the other — this
+       flattens the inner one back to plain, invisible content. */
+    .cd-card-wrapper .cd-card-wrapper {
+        display: contents !important;
+        background: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        position: static !important;
     }"""
     else:
         wrapper_css = ".cd-card-wrapper { display: contents; }"
@@ -208,6 +357,46 @@ def _build_css(config):
         cursor: default !important;
     }}
 
+    /* ── Night Mode ─────────────────────────────────
+       Bug fix: Anki adds a "night-mode" class to the review page's <html>
+       element when Night Mode is on, but this stylesheet never referenced
+       it, so nothing here actually adapted. Two concrete problems that
+       caused:
+       1) The *native* dropdown pop-up list (the part `appearance:none`
+          cannot restyle) always rendered with light/OS-default colours,
+          clashing with the dark card. `color-scheme` is the standards-
+          based way to ask the browser to draw native widgets (the
+          select's own pop-up, scrollbars, etc.) in a dark palette, and
+          is kept below since it costs nothing and helps on platforms
+          that honour it (e.g. AnkiWeb/AnkiDroid's browser engine) — but
+          Anki desktop's own webview (QtWebEngine) has been observed to
+          still pop up an OS-default *light* list while still letting
+          this stylesheet's `color: inherit` bleed a light text colour
+          onto it, which is worse than doing nothing: low-contrast pale
+          text on a pale background. `background-color`/`color` set
+          directly on <option> is a much older, far more universally
+          honoured styling hook than `color-scheme` (it works even where
+          the pop-up "chrome" itself can't be restyled), so it's set
+          explicitly below for both modes instead of being left to
+          inherit — that's the part that was actually missing.
+       2) The semi-transparent grey border on unanswered dropdowns has far
+          lower contrast against a dark background than a light one, so
+          it's bumped up here to stay easily visible. */
+    .night-mode {{
+        color-scheme: dark;
+    }}
+    .night-mode select {{
+        border-color: rgba(255,255,255,0.45) !important;
+    }}
+    select option {{
+        background-color: #ffffff;
+        color: #1f2937;
+    }}
+    .night-mode select option {{
+        background-color: #2b2b2b;
+        color: #f3f4f6;
+    }}
+
     /* feedback: border only — text keeps its native colour */
     select.cd-correct   {{ border-color: {correct_border} !important; }}
     select.cd-incorrect {{ border-color: {wrong_border}   !important; }}
@@ -221,7 +410,7 @@ def _build_css(config):
         display: inline-block; margin-left: 2px; margin-right: 4px;
     }}
 
-    .cloze-fallback {{ font-weight: bold; padding: 0 4px; }}
+    .cloze-fallback {{ font-weight: bold; padding: 0 4px; display: none; }}
 
     /* ── back card ───────────────────────────────── */
     .highlight {{ font-weight: bold !important; }}
@@ -239,6 +428,10 @@ def _build_css(config):
         text-align: left; padding: 12px 16px; border-radius: 6px;
     }}
     .audio-box {{
+        /* Per user reference (Anki's own Preview window play button): the
+           audio control should sit fixed at the top-right of the window
+           itself, floating above/outside the card entirely — not anchored
+           inside the white box, where it overlapped the card's own text. */
         position: fixed !important;
         top: 12px !important;
         right: 16px !important;
@@ -351,6 +544,26 @@ def create_dsa_model():
     qtemplate += '    while(sel.options.length>1)sel.remove(1);\n'
     qtemplate += '    options.forEach(function(o){var opt=document.createElement("option");opt.value=opt.textContent=o;sel.appendChild(opt);});\n'
     qtemplate += '  }\n\n'
+    qtemplate += '  // Bug fix: window.cloze_dropdown_active is only ever set by the desktop\n'
+    qtemplate += '  // add-on Python hook, so it is never set on AnkiDroid, AnkiMobile, or\n'
+    qtemplate += '  // AnkiWeb, and stays unset if the add-on is disabled on desktop while the\n'
+    qtemplate += '  // note type persists. A non-blank slot used to just be hidden with\n'
+    qtemplate += '  // nothing in its place in that case, so the sentence silently lost\n'
+    qtemplate += '  // words instead of degrading gracefully. Show a plain-text stand-in\n'
+    qtemplate += '  // instead, reusing the .cloze-fallback class (already defined in the\n'
+    qtemplate += '  // CSS, but never actually applied anywhere).\n'
+    qtemplate += '  function showFallback(id,text){\n'
+    qtemplate += '    var el=document.getElementById(id); if(!el)return;\n'
+    qtemplate += '    var fb=document.getElementById(id+"-fallback");\n'
+    qtemplate += '    if(!fb){\n'
+    qtemplate += '      fb=document.createElement("span");\n'
+    qtemplate += '      fb.id=id+"-fallback";\n'
+    qtemplate += '      fb.className="cloze-fallback";\n'
+    qtemplate += '      el.insertAdjacentElement("afterend",fb);\n'
+    qtemplate += '    }\n'
+    qtemplate += '    fb.textContent=text;\n'
+    qtemplate += '    fb.style.setProperty("display","inline-block","important");\n'
+    qtemplate += '  }\n\n'
     qtemplate += '  var dropdownConfig=[\n' + dropdown_cfg + '  ];\n\n'
     qtemplate += '  var isAddonActive=(typeof window.cloze_dropdown_active!=="undefined"&&window.cloze_dropdown_active);\n\n'
 
@@ -361,7 +574,8 @@ def create_dsa_model():
     qtemplate += '    window.__cdIsBack=false; // Reset for the next card\n'
     qtemplate += '    dropdownConfig.forEach(function(cfg,idx){\n'
     qtemplate += '      var el=document.getElementById(cfg.id); if(!el)return;\n'
-    qtemplate += '      if(!cfg.val||!isAddonActive){el.style.setProperty("display","none","important");return;}\n'
+    qtemplate += '      if(!cfg.val){el.style.setProperty("display","none","important");return;}\n'
+    qtemplate += '      if(!isAddonActive){el.style.setProperty("display","none","important");showFallback(cfg.id,cfg.val);return;}\n'
     qtemplate += '      el.style.setProperty("display","inline-block","important");\n'
     qtemplate += '      if(normW)el.style.setProperty("width",normW,"important");\n'
     qtemplate += '      populateSelect(cfg.id);\n'
@@ -388,8 +602,11 @@ def create_dsa_model():
     qtemplate += '  }\n\n'
     qtemplate += '  dropdownConfig.forEach(function(cfg){\n'
     qtemplate += '    var el=document.getElementById(cfg.id); if(!el)return;\n'
-    qtemplate += '    if(!cfg.val||!isAddonActive){\n'
+    qtemplate += '    if(!cfg.val){\n'
     qtemplate += '      el.style.setProperty("display","none","important");\n'
+    qtemplate += '    } else if(!isAddonActive){\n'
+    qtemplate += '      el.style.setProperty("display","none","important");\n'
+    qtemplate += '      showFallback(cfg.id,"[...]");\n'
     qtemplate += '    } else {\n'
     qtemplate += '      el.style.setProperty("display","inline-block","important");\n'
     qtemplate += '      if(normW)el.style.setProperty("width",normW,"important");\n'
@@ -442,7 +659,20 @@ def create_dsa_model():
     translation_block = '{{#Translation}}\n  <div class="translation-box">&ldquo;{{Translation}}&rdquo;</div>\n{{/Translation}}\n' if show_oversaettelse else ""
 
     # ── Back template ─────────────────────────────────────────────────────────
-    atemplate  = '<script>window.__cdIsBack=true;</script>\n{{FrontSide}}\n<hr id=answer>\n'
+    # Bug fix: previously {{FrontSide}} (which already contains its own
+    # .cd-card-wrapper box) and .answer-wrapper were two separate boxes, so
+    # with White Background on they rarely matched in width/height. They now
+    # share a single outer .cd-card-wrapper, so the box that covers the
+    # recapped question on the back is the exact same element/size as the
+    # answer section below it — and the same size it was on the front, since
+    # nothing about that first box changes across the flip. (The nested
+    # .cd-card-wrapper this creates, from {{FrontSide}}'s own copy, is
+    # flattened to invisible/inert by the CSS rule above.) When White
+    # Background is off, "cd-card-wrapper" renders as `display:contents`
+    # (zero visual effect), so this restructure is safe either way.
+    atemplate  = '<script>window.__cdIsBack=true;</script>\n'
+    atemplate += '<div class="cd-card-wrapper">\n'
+    atemplate += '{{FrontSide}}\n<hr id=answer>\n'
     atemplate += '<div class="answer-wrapper">\n'
     atemplate += '  <div class="correct-sentence">'
     atemplate += '<span id="back-prefix">{{Quiz Prefix}}</span> '
@@ -452,6 +682,7 @@ def create_dsa_model():
     if audio_block:       atemplate += '  ' + audio_block
     if regel_block:       atemplate += '  ' + regel_block
     if translation_block: atemplate += '  ' + translation_block
+    atemplate += '</div>\n'
     atemplate += '</div>\n\n'
     atemplate += '<script>\n(function () {\n'
     atemplate += '  function safeSetItem(k,v){try{sessionStorage.setItem(k,v);}catch(e){(window.AnkiStorage=window.AnkiStorage||{})[k]=v;}}\n'
@@ -539,6 +770,28 @@ def create_dsa_model():
 
 # ── Dialog styling ────────────────────────────────────────────────────────────
 def _dialog_style():
+    if _is_dark():
+        return """
+            QDialog    { background-color: #1e2329; }
+            QLabel     { color: #d1d5db; }
+            QPushButton {
+                background-color: #2d3748; border: 1px solid #4a5568;
+                border-radius: 6px; padding: 8px 14px;
+                font-weight: bold; font-size: 11px; color: #e2e8f0;
+            }
+            QPushButton:hover   { background-color: #374151; border-color: #6b7280; }
+            QPushButton:pressed { background-color: #1f2937; }
+            QCheckBox  { font-size: 11px; color: #d1d5db; spacing: 8px; }
+            QCheckBox::indicator { width: 14px; height: 14px; }
+            QSpinBox, QLineEdit {
+                background-color: #2d3748; border: 1px solid #4a5568;
+                border-radius: 4px; padding: 4px; font-size: 11px; color: #e2e8f0;
+            }
+            QComboBox {
+                background-color: #2d3748; border: 1px solid #4a5568;
+                border-radius: 4px; padding: 4px 8px; font-size: 11px; color: #e2e8f0;
+            }
+        """
     return """
         QDialog    { background-color: #f8f9fa; }
         QLabel     { color: #2c3e50; }
@@ -571,7 +824,7 @@ def _make_color_picker(initial_hex, label_text="", parent=None):
 
     hex_edit = QLineEdit(initial_hex)
     hex_edit.setReadOnly(True); hex_edit.setFixedWidth(78)
-    hex_edit.setStyleSheet("font-family:monospace;font-size:11px;color:#111827;")
+    hex_edit.setStyleSheet("font-family:monospace;font-size:11px;")
 
     swatch = QPushButton()
     swatch.setFixedSize(22, 22); swatch.setCursor(CURSOR_HAND)
@@ -599,20 +852,46 @@ def _make_color_picker(initial_hex, label_text="", parent=None):
 
 # ── Guide dialog — clean minimal style, no scroll, two-column footer ──────────
 def show_guide_dialog(parent=None):
-    dlg = QDialog(parent or mw)
+    dark = _is_dark()
+    dlg  = QDialog(parent or mw)
     dlg.setWindowTitle(f"{ADDON_NAME} — Guide")
     dlg.setMinimumWidth(440)
-    dlg.setStyleSheet("""
-        QDialog  { background:#ffffff; }
-        QLabel   { color:#1f2937; }
-        QPushButton {
-            background:#f9fafb; border:1px solid #e5e7eb;
-            border-radius:6px; padding:8px 18px;
-            font-weight:bold; font-size:11px; color:#374151;
-        }
-        QPushButton:hover   { background:#f3f4f6; border-color:#d1d5db; }
-        QPushButton:pressed { background:#e5e7eb; }
-    """)
+
+    # ── Dark-aware palette ────────────────────────────────────────────────
+    if dark:
+        dlg.setStyleSheet("""
+            QDialog  { background:#1e2329; }
+            QLabel   { color:#d1d5db; }
+            QPushButton {
+                background:#2d3748; border:1px solid #4a5568;
+                border-radius:6px; padding:8px 18px;
+                font-weight:bold; font-size:11px; color:#e2e8f0;
+            }
+            QPushButton:hover   { background:#374151; border-color:#6b7280; }
+            QPushButton:pressed { background:#1f2937; }
+        """)
+        sep_col  = "#374151"
+        sep_col2 = "#2d3748"
+        body_col = "#c9d1d9"
+        t2_col   = "#9ca3af"
+        foot_col = "#6b7280"
+    else:
+        dlg.setStyleSheet("""
+            QDialog  { background:#ffffff; }
+            QLabel   { color:#1f2937; }
+            QPushButton {
+                background:#f9fafb; border:1px solid #e5e7eb;
+                border-radius:6px; padding:8px 18px;
+                font-weight:bold; font-size:11px; color:#374151;
+            }
+            QPushButton:hover   { background:#f3f4f6; border-color:#d1d5db; }
+            QPushButton:pressed { background:#e5e7eb; }
+        """)
+        sep_col  = "#e5e7eb"
+        sep_col2 = "#f3f4f6"
+        body_col = "#374151"
+        t2_col   = "#6b7280"
+        foot_col = "#9ca3af"
 
     lay = QVBoxLayout()
     lay.setSpacing(0)
@@ -629,18 +908,18 @@ def show_guide_dialog(parent=None):
             hdr.addWidget(icon_lbl)
     title_col = QVBoxLayout(); title_col.setSpacing(2)
     t1 = QLabel(f"<b><font size='4'>{ADDON_NAME}</font></b>")
-    t2 = QLabel(f"<font color='#6b7280'>v{ADDON_VERSION} — Interactive dropdown cards</font>")
+    t2 = QLabel(f"<font color='{t2_col}'>v{ADDON_VERSION} — Interactive dropdown cards</font>")
     t2.setStyleSheet("font-size:10px;")
     title_col.addWidget(t1); title_col.addWidget(t2)
     hdr.addLayout(title_col); hdr.addStretch()
     lay.addLayout(hdr); lay.addSpacing(10)
 
     sep0 = QFrame(); sep0.setFixedHeight(1)
-    sep0.setStyleSheet("background:#e5e7eb;border:none;")
+    sep0.setStyleSheet(f"background:{sep_col};border:none;")
     lay.addWidget(sep0); lay.addSpacing(10)
 
     # ── Body — plain QLabel, all visible without scrolling ────────────────
-    body = QLabel(f"""<div style="font-size:11px;color:#374151;line-height:1.55;">
+    body = QLabel(f"""<div style="font-size:11px;color:{body_col};line-height:1.55;">
 
 <p style="margin:0 0 3px 0;"><b>What it does</b></p>
 <ul style="margin:0 0 9px 16px;padding:0;">
@@ -680,7 +959,7 @@ def show_guide_dialog(parent=None):
 
     lay.addSpacing(10)
     sep1 = QFrame(); sep1.setFixedHeight(1)
-    sep1.setStyleSheet("background:#e5e7eb;border:none;")
+    sep1.setStyleSheet(f"background:{sep_col};border:none;")
     lay.addWidget(sep1); lay.addSpacing(8)
 
     # ── Buttons ───────────────────────────────────────────────────────────
@@ -701,8 +980,11 @@ def show_guide_dialog(parent=None):
         QPushButton:pressed { background:#1d4ed8; }
     """)
     def _ok():
-        # Bug fix: previously called parent.reject() here, which closed the settings
-        # dialog and discarded unsaved changes. Now we just close the guide.
+        # Bug fix: this used to call parent.reject() on the Settings dialog,
+        # which silently discarded any unsaved changes the user had made
+        # before opening the guide (e.g. Settings → Open Help Guide → Got it
+        # would wipe out every checkbox/colour change instead of saving it).
+        # Just close the guide and leave Settings (if any) open underneath.
         dlg.accept()
     ok_btn.clicked.connect(_ok)
     btn_row.addWidget(ok_btn)
@@ -710,12 +992,12 @@ def show_guide_dialog(parent=None):
 
     # ── Footer — two columns: name on left, "since 2026" on right ────────
     sep2 = QFrame(); sep2.setFixedHeight(1)
-    sep2.setStyleSheet("background:#f3f4f6;border:none;")
+    sep2.setStyleSheet(f"background:{sep_col2};border:none;")
     lay.addWidget(sep2); lay.addSpacing(5)
 
     foot_row = QHBoxLayout()
-    left_foot  = QLabel(f"<font color='#9ca3af'>{ADDON_NAME} — {ADDON_AUTHOR}</font>")
-    right_foot = QLabel("<font color='#9ca3af'>since 2026</font>")
+    left_foot  = QLabel(f"<font color='{foot_col}'>{ADDON_NAME} v{ADDON_VERSION} — Created by Adel</font>")
+    right_foot = QLabel(f"<font color='{foot_col}'>since 2026</font>")
     left_foot.setStyleSheet("font-size:9px;")
     right_foot.setStyleSheet("font-size:9px;")
     foot_row.addWidget(left_foot)
@@ -730,6 +1012,7 @@ def show_guide_dialog(parent=None):
 # ── Settings dialog ───────────────────────────────────────────────────────────
 def show_settings_dialog():
     config = get_config()
+    dark   = _is_dark()
     dlg    = QDialog(mw)
     dlg.setWindowTitle(f"{ADDON_NAME} Settings")
     dlg.setMinimumWidth(380)
@@ -746,7 +1029,8 @@ def show_settings_dialog():
             lbl = QLabel(); lbl.setPixmap(pm.scaledToHeight(34, SMOOTH))
             hdr.addWidget(lbl); hdr.addSpacing(6)
     title_lbl = QLabel(f"<b>{ADDON_NAME} Settings</b>")
-    title_lbl.setStyleSheet("font-size:13px;font-weight:bold;color:#111827;")
+    title_color = "#f1f5f9" if dark else "#111827"
+    title_lbl.setStyleSheet(f"font-size:13px;font-weight:bold;color:{title_color};")
     hdr.addWidget(title_lbl)
     lay.addLayout(hdr); lay.addSpacing(8)
 
@@ -813,7 +1097,7 @@ def show_settings_dialog():
     sent_hex_state = [config["custom_correct_color"]]
     sent_hex_edit  = QLineEdit(sent_hex_state[0])
     sent_hex_edit.setReadOnly(True); sent_hex_edit.setFixedWidth(78)
-    sent_hex_edit.setStyleSheet("font-family:monospace;font-size:11px;color:#111827;")
+    sent_hex_edit.setStyleSheet("font-family:monospace;font-size:11px;")
     sent_swatch = QPushButton(); sent_swatch.setFixedSize(22, 22); sent_swatch.setCursor(CURSOR_HAND)
 
     def _ref_sent():
@@ -896,7 +1180,26 @@ def show_settings_dialog():
             "custom_correct_color"     : sent_hex_state[0],
         })
         mw.addonManager.writeConfig(__name__, new_cfg)
-        showInfo("Settings saved. Restart Anki (or reload the profile) to apply.", parent=mw)
+
+        # Bug fix: settings used to only take effect after restarting Anki,
+        # because the note type's fields/templates/CSS are only (re)built by
+        # create_dsa_model(), which previously ran once at startup
+        # (profile_did_open) and nowhere else. Rebuilding it here — right
+        # after the new config is written — applies the change immediately
+        # to the collection, so new/next cards use it with no restart. This
+        # never removes existing fields, so it's safe to run at any time.
+        try:
+            create_dsa_model()
+        except Exception:
+            pass
+
+        # If a card of this note type is on screen right now, redraw it so
+        # the change is visible instantly instead of only on the next card.
+        try:
+            if mw.state == "review" and mw.reviewer and mw.reviewer.card:
+                mw.reviewer._redraw_current_card()
+        except Exception:
+            pass
 
 
 # ── Menu ──────────────────────────────────────────────────────────────────────
@@ -904,7 +1207,7 @@ def setup_menu():
     global _menu_action
     if _menu_action is not None:
         return
-    _menu_action = QAction(f"{ADDON_NAME} Settings…", mw)
+    _menu_action = QAction(f"Cloze Dropdown", mw)
     _menu_action.triggered.connect(show_settings_dialog)
     mw.form.menuTools.addAction(_menu_action)
 
