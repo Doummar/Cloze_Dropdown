@@ -129,4 +129,4 @@ https://github.com/Doummar/Cloze_Dropdown/issues
 
 ---
 
-**Study smarter, choose confidently, and keep learning! — Adel**
+**Study smarter, choose confidently, and keep learning!** - Adel
